@@ -1,15 +1,24 @@
 package db
 
 import (
+	"extract-tls/options"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
+	"os"
 )
 
 var db *gorm.DB
 
 func init() {
-	dbOpen, err := gorm.Open(sqlite.Open("misc.db?cache=shared&mode=rwc&_journal_mode=WAL"), &gorm.Config{})
+	if *options.DBFlag == "" {
+		log.Fatal("A database filename has to be provided with '-db'")
+	}
+	if _, err := os.Stat(*options.DBFlag); os.IsNotExist(err) {
+		log.Fatal(*options.DBFlag + " does not exist.")
+	}
+
+	dbOpen, err := gorm.Open(sqlite.Open(*options.DBFlag + "?cache=shared&mode=rwc&_journal_mode=WAL"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
